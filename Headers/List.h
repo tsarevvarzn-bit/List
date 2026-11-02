@@ -28,12 +28,14 @@ const size_t POISON            = 675242;
 
 enum return_codes{
 
-    RET_CONTINUE = 0,
-    RET_END      = 1
+    RET_CORRECT = 0,
+    RET_ERROR   = 1
 };
 
 return_codes createList      (list_t** const         list_p_p, size_t list_size);
 void         printList       (list_t   const * const list_p);
-void         addElemInList   (list_t*  const         list_p, int idx_prev, int value);
-void         deleteElemInList(list_t*  const         list_p, int idx_del);
+return_codes addElemInList   (list_t*  const         list_p, size_t idx_prev, int value);
+void         deleteElemInList(list_t*  const         list_p, size_t idx_del);
+return_codes checkAndResizeUp(list_t*  const         list_p);
+
 #endif
