@@ -1,0 +1,156 @@
+digraph {
+
+    graph [
+        rankdir=TB,
+        splines=polyline,
+        overlap=true,
+        nodesep=0.5,
+        ranksep=0.8,
+        bgcolor="#312d4b"
+    ]
+
+    edge [
+        penwidth=2,
+        arrowhead="vee"
+    ]
+
+    node [shape=plain]
+
+    1 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 1</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 0</TD>
+                <TD>value = 52</TD>
+                <TD PORT="next">next = 2</TD>
+            </TR>
+        </TABLE>
+    >];
+
+    2 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 2</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 1</TD>
+                <TD>value = 52</TD>
+                <TD PORT="next">next = 3</TD>
+            </TR>
+        </TABLE>
+    >];
+
+    3 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 3</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 2</TD>
+                <TD>value = 17</TD>
+                <TD PORT="next">next = 4</TD>
+            </TR>
+        </TABLE>
+    >];
+
+    4 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 4</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 3</TD>
+                <TD>value = 31</TD>
+                <TD PORT="next">next = 5</TD>
+            </TR>
+        </TABLE>
+    >];
+
+    5 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 5</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 4</TD>
+                <TD>value = 42</TD>
+                <TD PORT="next">next = 6</TD>
+            </TR>
+        </TABLE>
+    >];
+
+    6 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 6</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 5</TD>
+                <TD>value = 15</TD>
+                <TD PORT="next">next = 7</TD>
+            </TR>
+        </TABLE>
+    >];
+
+    7 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 7</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 6</TD>
+                <TD>value = 24</TD>
+                <TD PORT="next">next = 8</TD>
+            </TR>
+        </TABLE>
+    >];
+
+    8 [label=<
+        <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#9975bf">
+            <TR><TD COLSPAN="3">idx = 8</TD></TR>
+            <TR>
+                <TD PORT="prev">prev = 7</TD>
+                <TD>value = 12</TD>
+                <TD PORT="next">next = 0</TD>
+            </TR>
+        </TABLE>
+    >];
+
+
+    node [
+        shape=oval,
+        style=filled,
+        fillcolor="#75b1bf"
+    ]
+
+    // Связи head и tail
+
+    edge [color="#54c282"];
+
+    tail -> 3;
+    head -> 5;
+    "first free" -> 7
+
+
+    // Связи между элементами списка
+
+    edge [
+        color="#0e6fbe",
+        constraint=false,
+        penwidth=2
+    ];
+
+    1:next:e -> 3:prev:w;
+    2:next:e -> 5:prev:w;
+    3:next:e -> 4:prev:w;
+    4:next:e -> 2:prev:w;
+    5:next:e -> 6:prev:w;
+
+    7:next:e -> 8:prev:w;
+
+
+    // Горизонтальный порядок элементов
+
+    edge [
+        style=invis,
+        constraint=true,
+        weight=100
+    ];
+
+    1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8;
+
+
+    // Head и tail снизу
+
+    {rank=same; 1; 2; 3; 4; 5; 6; 7; 8}
+    {rank=sink; head; tail;"first free"}
+
+}

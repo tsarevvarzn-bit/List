@@ -2,37 +2,43 @@
 
 int main(){
 
+    //Генерим *.dot файл, затем вызываем графвиз как приложения для визуализации созданного dot файла
+
     list_t* list_p = NULL;
     createList(&list_p, DEFAULT_LIST_SIZE);
 
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 52);
+    addElemInTailOfList(list_p, 52);//TODO new func, without list_p->
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 52);
+    addElemInTailOfList(list_p, 52);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
     addElemInList(list_p, 1, 98);
     printList(list_p);
     deleteElemInList(list_p, 3);
     printList(list_p);
 
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
-    addElemInList(list_p, list_p->tail_idx, 67);
+    addElemInTailOfList(list_p, 67);
     printList(list_p);
+
+    //list_p->first_elem_p[0].idx_next = list_p->head_idx;
+
+    visualizeListWithGraphviz(list_p);
 }
 
 return_codes createList(list_t** const list_p_p, size_t list_size){
@@ -60,8 +66,6 @@ return_codes createList(list_t** const list_p_p, size_t list_size){
         return RET_ERROR;
     }
 
-    list_p->head_idx      = 1;
-    list_p->tail_idx      = 0;
     list_p->free_elem_idx = 1;
 
     list_p->first_elem_p[0].idx_prev   = 0;
@@ -90,10 +94,9 @@ void printList(list_t const * const list_p){
 
     printf("\nPrint list with "  GREEN  "%llu" DEFAULT " size, head idx: " YELLOW "%llu"   DEFAULT
                   ", tail idx: " VIOLET "%llu" DEFAULT ", free elem idx: " YELLOW "%llu\n" DEFAULT,
-           list_p->num_of_elems, list_p->head_idx, list_p->tail_idx, list_p->free_elem_idx);
+           list_p->num_of_elems, list_p->first_elem_p[0].idx_next, list_p->first_elem_p[0].idx_prev, list_p->free_elem_idx);
 
     printf("N    PREV_IDX     ELEM_VALUE   NEXT_IDX\n\n");
-
 
     for(size_t i = 0; i <= list_p->num_of_elems; i++){
 
@@ -104,6 +107,162 @@ void printList(list_t const * const list_p){
                list_p->first_elem_p[i].idx_next        );
     }
 }
+
+void visualizeListWithGraphviz(const list_t* const list_p){
+
+    assert(list_p);
+
+    FILE* out_dot_file_p = fopen("DataForVisualization.dot", "w");
+
+    fprintf(out_dot_file_p, "digraph {\n\
+    \n\
+    graph [\n\
+        rankdir=TB,\n\
+        splines=true,\n\
+        overlap=true,\n\
+        nodesep=0.5,\n\
+        ranksep=0.8,\n\
+        bgcolor=\"#312d4b\"\n\
+    ]\n\
+    \n\
+    edge [\n\
+        penwidth=2,\n\
+        arrowhead=\"vee\"\n\
+    ]\n\
+    \n\
+    node [shape=plain]\n");
+
+    for(size_t i = 0; i <= list_p->num_of_elems; i++){
+
+        addElemToVisualization(list_p, i, out_dot_file_p);
+    }
+
+    // Связи head и tail
+    fprintf(out_dot_file_p, "    node [\n\
+        shape=oval,\n\
+        style=filled,\n\
+        fillcolor=\"#75b1bf\"\n\
+    ]\n\
+    edge [color=\"#54c282\"];\n\
+    tail -> %llu;\n\
+    head -> %llu;\n\
+    \"first free\" -> %llu\n",
+    list_p->first_elem_p[0].idx_next, list_p->first_elem_p[0].idx_prev, list_p->free_elem_idx);
+
+    //Отдельно рисуем для нулевого элемента
+
+    fprintf(out_dot_file_p, "\tedge [\n\
+        color=\"#b5be0e\",\n\
+        constraint=false,\n\
+        penwidth=2\n\
+    ];\n");
+
+    fprintf(out_dot_file_p,
+        "0:next:e -> %llu:prev:w;\n",
+        list_p->first_elem_p[0].idx_next);
+
+    // Связи между элементами списка
+
+    fprintf(out_dot_file_p, "\tedge [\n\
+        color=\"#0e6fbe\",\n\
+        constraint=false,\n\
+        penwidth=2\n\
+    ];\n");
+
+    for(size_t i = 1; i <= list_p->num_of_elems; i++){
+
+        if(i == 0 || list_p->first_elem_p[i].idx_next == 0){
+
+            fprintf(out_dot_file_p, "\tedge [\n\
+                color=\"#b5be0e\",\n\
+                constraint=false,\n\
+                penwidth=2\n\
+            ];\n");
+
+            fprintf(out_dot_file_p,
+                "%llu:next:e -> %llu:prev:w;\n",
+                i, list_p->first_elem_p[i].idx_next);
+
+            fprintf(out_dot_file_p, "\tedge [\n\
+                color=\"#0e6fbe\",\n\
+                constraint=false,\n\
+                penwidth=2\n\
+            ];\n");
+
+        }else{
+
+            fprintf(out_dot_file_p,
+                "%llu:next:e -> %llu:prev:w;\n",
+                i, list_p->first_elem_p[i].idx_next);
+        }
+    }
+
+    // Горизонтальный порядок элементов
+
+    fprintf(out_dot_file_p, "\nedge [\n\
+        style=invis,\n\
+        constraint=true,\n\
+        weight=100\n\
+    ];\n");
+
+    fprintf(out_dot_file_p, "1");
+
+    for(size_t i = 2; i <= list_p->num_of_elems; i++){
+
+        fprintf(out_dot_file_p, " -> %llu", i);
+    }
+    fprintf(out_dot_file_p, "\n");
+    //1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8;
+
+
+    // Head и tail снизу
+
+    fprintf(out_dot_file_p, "{rank=same; ");
+
+    for(size_t i = 1; i <= list_p->num_of_elems; i++){
+
+        fprintf(out_dot_file_p, "%llu;", i);
+    }
+
+    fprintf(out_dot_file_p, "}\n");
+    //{rank=same; 1; 2; 3; 4; 5; 6; 7; 8}
+    fprintf(out_dot_file_p, "{rank=sink; head; tail;\"first free\"}");
+
+    fprintf(out_dot_file_p, "{rank=source; 0}");
+
+
+    fprintf(out_dot_file_p, "\n}");
+}
+
+void addElemToVisualization(const list_t* const list_p, const size_t elem_idx, FILE* const out_dot_file_p){
+
+    assert(list_p);
+    assert(out_dot_file_p);
+
+    fprintf(out_dot_file_p,
+        "\t%llu [label=<\n"
+        "        <TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\" BGCOLOR=\"#9975bf\">\n"
+        "            <TR><TD COLSPAN=\"3\">idx = %llu</TD></TR>\n"
+        "            <TR>\n"
+        "                <TD PORT=\"prev\">prev = %llu</TD>\n",
+        elem_idx, elem_idx, list_p->first_elem_p[elem_idx].idx_prev);
+
+    if (list_p->first_elem_p[elem_idx].value == POISON) {
+        fprintf(out_dot_file_p,
+            "                <TD BGCOLOR=\"yellow\">value = <B>POISON</B></TD>\n");
+    } else {
+        fprintf(out_dot_file_p,
+            "                <TD>value = %d</TD>\n",
+            list_p->first_elem_p[elem_idx].value);
+    }
+
+    fprintf(out_dot_file_p,
+        "                <TD PORT=\"next\">next = %llu</TD>\n"
+        "            </TR>\n"
+        "        </TABLE>\n"
+        "    >];\n",
+        list_p->first_elem_p[elem_idx].idx_next);
+    }
 
 return_codes addElemInList(list_t* const list_p, size_t idx_prev, int value){
 
@@ -130,9 +289,9 @@ return_codes addElemInList(list_t* const list_p, size_t idx_prev, int value){
     list_p->first_elem_p[list_p->first_elem_p[new_elem_idx].idx_next].idx_prev = new_elem_idx;
 
     //Если это новый конец
-    if(idx_prev == list_p->tail_idx){
+    if(idx_prev == list_p->first_elem_p[0].idx_prev){
 
-        list_p->tail_idx = new_elem_idx;
+        list_p->first_elem_p[0].idx_prev = new_elem_idx;
 
         list_p->first_elem_p[new_elem_idx].idx_next = 0;
     }
@@ -140,14 +299,10 @@ return_codes addElemInList(list_t* const list_p, size_t idx_prev, int value){
     //Если это новое начало
     if(idx_prev == 0){
 
-        list_p->head_idx = new_elem_idx;
+        list_p->first_elem_p[0].idx_next = new_elem_idx;
 
         list_p->first_elem_p[new_elem_idx].idx_prev = 0;
     }
-
-    //Возвращаем нулевой элемент
-    list_p->first_elem_p[0].idx_prev = 0;
-    list_p->first_elem_p[0].idx_next = 0;
 
     return RET_CORRECT;
 }
@@ -175,20 +330,17 @@ void deleteElemInList(list_t* const list_p, size_t idx_del){
     list_p->free_elem_idx = idx_del;
 
     //Если это был конец
-    if(idx_del == list_p->tail_idx){
+    if(idx_del == list_p->first_elem_p[0].idx_prev){
 
-        list_p->tail_idx = idx_old_prev;
+        list_p->first_elem_p[0].idx_prev = idx_old_prev;
     }
 
     //Если было начало
-    if(idx_del == list_p->head_idx){
+    if(idx_del == list_p->first_elem_p[0].idx_next){
 
-        list_p->head_idx = idx_old_next;
+        list_p->first_elem_p[0].idx_next = idx_old_next;
     }
 
-    //Возвращаем нулевой элемент
-    list_p->first_elem_p[0].idx_prev = 0;
-    list_p->first_elem_p[0].idx_next = 0;
 }
 
 return_codes checkAndResizeUp(list_t* const list_p){
@@ -240,4 +392,11 @@ return_codes checkAndResizeUp(list_t* const list_p){
     printList(list_p);
 
     return RET_CORRECT;
+}
+
+return_codes addElemInTailOfList(list_t* const list_p, int value){
+
+    assert(list_p);
+
+    return addElemInList(list_p, list_p->first_elem_p[0].idx_prev, value);
 }
