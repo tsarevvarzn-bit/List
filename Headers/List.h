@@ -16,7 +16,7 @@ struct elem_struct_t{
 
 struct list_t{
 
-    size_t         num_of_elems ;
+    size_t         size         ;
     elem_struct_t* first_elem_p ;
     size_t         free_elem_idx;
 };
@@ -33,10 +33,12 @@ enum return_codes{
 };
 
 return_codes createList                     (      list_t*       * const list_p_p, size_t list_size);
-
 void         printListInConsole             (const list_t* const list_p);
 void         deleteElemInList               (      list_t* const list_p, size_t idx_del);
-return_codes addElemInList                  (      list_t* const list_p, size_t idx_prev, int value);
+return_codes addElemInListAfterThat         (      list_t* const list_p, size_t idx_prev, int value);
+return_codes addElemInListBeforeThat        (      list_t* const list_p, size_t idx_next, int value);
+return_codes addElemInTailOfList            (      list_t* const list_p, int value);
+return_codes addElemInHeadOfList            (      list_t* const list_p, int value);
 return_codes checkAndResizeUp               (      list_t* const list_p);
 
 void         visualizeListWithGraphviz      (const list_t* const list_p);
@@ -46,8 +48,11 @@ void         addElemsToVisualization        (const list_t* const list_p, FILE* c
 void         addElemEdgesToVisualization    (const list_t* const list_p, FILE* const out_dot_file_p);
 void         addSpecialEdgesToVisualization (const list_t* const list_p, FILE* const out_dot_file_p);
 void         setElemslocationInVisualization(const list_t* const list_p, FILE* const out_dot_file_p);
+void         addUnnormalEdgesToVisualization(const list_t* const list_p, FILE* const out_dot_file_p);
 
-return_codes addElemInTailOfList            (      list_t* const list_p, int value);
+bool         isElemNextEdgeCorrect          (const list_t* const list_p, size_t idx);
+bool         isElemPrevEdgeCorrect          (const list_t* const list_p, size_t idx);
+
 //TODO добавит в конец, в начало, перед элементом
 
 #endif
