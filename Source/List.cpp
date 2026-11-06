@@ -7,34 +7,34 @@ int main(){
     list_t* list_p = NULL;
     createList(&list_p, DEFAULT_LIST_SIZE);
 
-    printList(list_p);
-    addElemInTailOfList(list_p, 52);//TODO new func, without list_p->
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 52);
-    printList(list_p);
+    printListInConsole(list_p);
+    addElemInTailOfList(list_p, 52);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInList(list_p, 1, 98);
-    printList(list_p);
+    printListInConsole(list_p);
     deleteElemInList(list_p, 3);
-    printList(list_p);
+    printListInConsole(list_p);
 
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
-    printList(list_p);
+    printListInConsole(list_p);
 
 
     visualizeListWithGraphviz(list_p);
@@ -87,7 +87,7 @@ return_codes createList(list_t** const list_p_p, size_t list_size){
     return RET_CORRECT;
 }
 
-void printList(list_t const * const list_p){
+void printListInConsole(list_t const * const list_p){
 
     assert(list_p);
 
@@ -111,7 +111,43 @@ void visualizeListWithGraphviz(const list_t* const list_p){
 
     assert(list_p);
 
+
     FILE* out_dot_file_p = fopen("DataForVisualization.dot", "w");
+
+
+    addPreambleToVisualization     (list_p, out_dot_file_p);
+
+    addElemsToVisualization        (list_p, out_dot_file_p);
+
+    addSpecialEdgesToVisualization (list_p, out_dot_file_p);
+
+    addElemEdgesToVisualization    (list_p, out_dot_file_p);
+
+    setElemslocationInVisualization(list_p, out_dot_file_p);
+
+
+    fclose(out_dot_file_p);
+
+
+    int result = system(".\\Graphviz\\bin\\dot.exe -Tsvg DataForVisualization.dot -o visualization.svg");
+
+    if(result == SYSTEM_CORRECT_RETURN){
+
+        printf(GREEN "Correct visualization! Look for a visualization file named " YELLOW "\"visualization.svg\"\n" DEFAULT);
+
+    }else{
+
+        printf(RED "ERROR! Incorrect return of\n"                                                                                    \
+                   "int result = system(\".\\Graphviz\\bin\\dot.exe -Tsvg DataForVisualization.dot -o visualization.svg\");\n"       \
+                   "result: %d" DEFAULT, result);
+    }
+}
+
+void addPreambleToVisualization(const list_t* const list_p, FILE* const out_dot_file_p){
+
+    assert(list_p);
+    assert(out_dot_file_p);
+
 
     fprintf(out_dot_file_p, "digraph {\n\
     \n\
@@ -130,37 +166,48 @@ void visualizeListWithGraphviz(const list_t* const list_p){
     ]\n\
     \n\
     node [shape=plain]\n");
+}
 
-    for(size_t i = 0; i <= list_p->num_of_elems; i++){
+void addElemsToVisualization(const list_t* const list_p, FILE* const out_dot_file_p){
 
-        addElemToVisualization(list_p, i, out_dot_file_p);
+    assert(list_p);
+    assert(out_dot_file_p);
+
+    for(size_t elem_idx = 0; elem_idx <= list_p->num_of_elems; elem_idx++){
+
+        fprintf(out_dot_file_p,
+            "\t%llu [label=<\n"
+            "        <TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\" BGCOLOR=\"#9975bf\">\n"
+            "            <TR><TD COLSPAN=\"3\">idx = %llu</TD></TR>\n"
+            "            <TR>\n"
+            "                <TD PORT=\"prev\">prev = %llu</TD>\n",
+            elem_idx, elem_idx, list_p->first_elem_p[elem_idx].idx_prev);
+
+        if (list_p->first_elem_p[elem_idx].value == POISON) {
+
+            fprintf(out_dot_file_p,
+            "                <TD BGCOLOR=\"yellow\">value = <B>POISON</B></TD>\n");
+
+        } else {
+
+            fprintf(out_dot_file_p,
+            "                <TD>value = %d</TD>\n",
+            list_p->first_elem_p[elem_idx].value);
+        }
+
+        fprintf(out_dot_file_p,
+            "                <TD PORT=\"next\">next = %llu</TD>\n"
+            "            </TR>\n"
+            "        </TABLE>\n"
+            "    >];\n",
+            list_p->first_elem_p[elem_idx].idx_next);
     }
+}
 
-    // Связи head и tail
-    fprintf(out_dot_file_p, "    node [\n\
-        shape=oval,\n\
-        style=filled,\n\
-        fillcolor=\"#75b1bf\"\n\
-    ]\n\
-    edge [color=\"#54c282\"];\n\
-    tail -> %llu;\n\
-    head -> %llu;\n\
-    \"first free\" -> %llu\n",
-    list_p->first_elem_p[0].idx_next, list_p->first_elem_p[0].idx_prev, list_p->free_elem_idx);
+void addElemEdgesToVisualization(const list_t* const list_p, FILE* const out_dot_file_p){
 
-    //Отдельно рисуем для нулевого элемента
-
-    fprintf(out_dot_file_p, "\tedge [\n\
-        color=\"#b5be0e\",\n\
-        constraint=false,\n\
-        penwidth=2\n\
-    ];\n");
-
-    fprintf(out_dot_file_p,
-        "0:next:e -> %llu:prev:w;\n",
-        list_p->first_elem_p[0].idx_next);
-
-    // Связи между элементами списка
+    assert(list_p);
+    assert(out_dot_file_p);
 
     fprintf(out_dot_file_p, "\tedge [\n\
         color=\"#0e6fbe\",\n\
@@ -168,9 +215,9 @@ void visualizeListWithGraphviz(const list_t* const list_p){
         penwidth=2\n\
     ];\n");
 
-    for(size_t i = 1; i <= list_p->num_of_elems; i++){
+    for(size_t elem_idx = 1; elem_idx <= list_p->num_of_elems; elem_idx++){
 
-        if(i == 0 || list_p->first_elem_p[i].idx_next == 0){
+        if(elem_idx == 0 || list_p->first_elem_p[elem_idx].idx_next == 0){
 
             fprintf(out_dot_file_p, "\tedge [\n\
                 color=\"#b5be0e\",\n\
@@ -180,7 +227,7 @@ void visualizeListWithGraphviz(const list_t* const list_p){
 
             fprintf(out_dot_file_p,
                 "%llu:next:e -> %llu:prev:w;\n",
-                i, list_p->first_elem_p[i].idx_next);
+                elem_idx, list_p->first_elem_p[elem_idx].idx_next);
 
             fprintf(out_dot_file_p, "\tedge [\n\
                 color=\"#0e6fbe\",\n\
@@ -192,11 +239,48 @@ void visualizeListWithGraphviz(const list_t* const list_p){
 
             fprintf(out_dot_file_p,
                 "%llu:next:e -> %llu:prev:w;\n",
-                i, list_p->first_elem_p[i].idx_next);
+                elem_idx, list_p->first_elem_p[elem_idx].idx_next);
         }
     }
+}
 
-    // Горизонтальный порядок элементов
+void addSpecialEdgesToVisualization(const list_t* const list_p, FILE* const out_dot_file_p){
+
+    assert(list_p);
+    assert(out_dot_file_p);
+
+    // Рисуем head, tail и first free
+    fprintf(out_dot_file_p, "    node [\n\
+        shape=oval,\n\
+        style=filled,\n\
+        fillcolor=\"#75b1bf\"\n\
+        weight=100\n\
+    ]\n\
+    edge [color=\"#54c282\"];\n\
+    tail -> %llu:s;\n\
+    head -> %llu:s;\n\
+    \"first free\" -> %llu:s\n",
+    list_p->first_elem_p[0].idx_next, list_p->first_elem_p[0].idx_prev, list_p->free_elem_idx);
+
+    //Отдельно рисуем нулевой элемент
+
+    fprintf(out_dot_file_p, "\tedge [\n\
+        color=\"#b5be0e\",\n\
+        constraint=false,\n\
+        penwidth=2\n\
+    ];\n");
+
+    fprintf(out_dot_file_p,
+            "0:next:e -> %llu:prev:w;\n",
+            list_p->first_elem_p[0].idx_next);
+}
+
+void setElemslocationInVisualization(const list_t* const list_p, FILE* const out_dot_file_p){
+
+    assert(list_p);
+    assert(out_dot_file_p);
+
+    //Задаем горизонтальный строгий порядок по индексам
 
     fprintf(out_dot_file_p, "\nedge [\n\
         style=invis,\n\
@@ -211,10 +295,8 @@ void visualizeListWithGraphviz(const list_t* const list_p){
         fprintf(out_dot_file_p, " -> %llu", i);
     }
     fprintf(out_dot_file_p, "\n");
-    //1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8;
 
-
-    // Head и tail снизу
+    // Head, tail first free снизу
 
     fprintf(out_dot_file_p, "{rank=same; ");
 
@@ -224,55 +306,11 @@ void visualizeListWithGraphviz(const list_t* const list_p){
     }
 
     fprintf(out_dot_file_p, "}\n");
-    //{rank=same; 1; 2; 3; 4; 5; 6; 7; 8}
     fprintf(out_dot_file_p, "{rank=sink; head; tail;\"first free\"}");
-
     fprintf(out_dot_file_p, "{rank=source; 0}");
-
-
     fprintf(out_dot_file_p, "\n}");
 
-
-    fclose(out_dot_file_p);
-
-    char cwd[100];
-    GetCurrentDirectoryA(100, cwd);
-    printf("CWD = %s\n", cwd);
-
-    int result = system(".\\Graphviz\\bin\\dot.exe -Tsvg DataForVisualization.dot -o visualization.svg");
-
-    printf("OUT: %d\n", result);
 }
-
-void addElemToVisualization(const list_t* const list_p, const size_t elem_idx, FILE* const out_dot_file_p){
-
-    assert(list_p);
-    assert(out_dot_file_p);
-
-    fprintf(out_dot_file_p,
-        "\t%llu [label=<\n"
-        "        <TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\" BGCOLOR=\"#9975bf\">\n"
-        "            <TR><TD COLSPAN=\"3\">idx = %llu</TD></TR>\n"
-        "            <TR>\n"
-        "                <TD PORT=\"prev\">prev = %llu</TD>\n",
-        elem_idx, elem_idx, list_p->first_elem_p[elem_idx].idx_prev);
-
-    if (list_p->first_elem_p[elem_idx].value == POISON) {
-        fprintf(out_dot_file_p,
-            "                <TD BGCOLOR=\"yellow\">value = <B>POISON</B></TD>\n");
-    } else {
-        fprintf(out_dot_file_p,
-            "                <TD>value = %d</TD>\n",
-            list_p->first_elem_p[elem_idx].value);
-    }
-
-    fprintf(out_dot_file_p,
-        "                <TD PORT=\"next\">next = %llu</TD>\n"
-        "            </TR>\n"
-        "        </TABLE>\n"
-        "    >];\n",
-        list_p->first_elem_p[elem_idx].idx_next);
-    }
 
 return_codes addElemInList(list_t* const list_p, size_t idx_prev, int value){
 
@@ -363,7 +401,7 @@ return_codes checkAndResizeUp(list_t* const list_p){
     }
 
     printf("We need to resize up\n");
-    printList(list_p);
+    printListInConsole(list_p);
 
     elem_struct_t* new_memory_block_p = (elem_struct_t*) realloc(list_p->first_elem_p, sizeof(elem_struct_t) * (list_p->num_of_elems * 2 + 1));
 
@@ -377,12 +415,12 @@ return_codes checkAndResizeUp(list_t* const list_p){
     list_p->first_elem_p = new_memory_block_p;
 
     printf("Allocated new memory block\n");
-    printList(list_p);
+    printListInConsole(list_p);
 
     list_p->first_elem_p[list_p->free_elem_idx].idx_next = list_p->num_of_elems + 1;
 
     printf("Update free elem idx\n");
-    printList(list_p);
+    printListInConsole(list_p);
 
     for(size_t i = list_p->num_of_elems + 1; i <= list_p->num_of_elems * 2; i++){
 
@@ -399,7 +437,7 @@ return_codes checkAndResizeUp(list_t* const list_p){
 
 
     printf("Update all new memory\n");
-    printList(list_p);
+    printListInConsole(list_p);
 
     return RET_CORRECT;
 }
