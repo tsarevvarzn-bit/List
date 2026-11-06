@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <windows.h>
 
 //#include <gvc.h>
 //#include <cgraph.h>

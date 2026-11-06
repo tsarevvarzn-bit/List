@@ -36,7 +36,6 @@ int main(){
     addElemInTailOfList(list_p, 67);
     printList(list_p);
 
-    //list_p->first_elem_p[0].idx_next = list_p->head_idx;
 
     visualizeListWithGraphviz(list_p);
 }
@@ -232,6 +231,17 @@ void visualizeListWithGraphviz(const list_t* const list_p){
 
 
     fprintf(out_dot_file_p, "\n}");
+
+
+    fclose(out_dot_file_p);
+
+    char cwd[100];
+    GetCurrentDirectoryA(100, cwd);
+    printf("CWD = %s\n", cwd);
+
+    int result = system(".\\Graphviz\\bin\\dot.exe -Tsvg DataForVisualization.dot -o visualization.svg");
+
+    printf("OUT: %d\n", result);
 }
 
 void addElemToVisualization(const list_t* const list_p, const size_t elem_idx, FILE* const out_dot_file_p){
