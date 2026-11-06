@@ -36,6 +36,9 @@ int main(){
     addElemInTailOfList(list_p, 67);
     printListInConsole(list_p);
 
+    deleteElemInList(list_p, 8);
+    printListInConsole(list_p);
+
 
     visualizeListWithGraphviz(list_p);
 }
@@ -202,6 +205,8 @@ void addElemsToVisualization(const list_t* const list_p, FILE* const out_dot_fil
             "    >];\n",
             list_p->first_elem_p[elem_idx].idx_next);
     }
+
+
 }
 
 void addElemEdgesToVisualization(const list_t* const list_p, FILE* const out_dot_file_p){
@@ -273,6 +278,23 @@ void addSpecialEdgesToVisualization(const list_t* const list_p, FILE* const out_
     fprintf(out_dot_file_p,
             "0:next:e -> %llu:prev:w;\n",
             list_p->first_elem_p[0].idx_next);
+
+    fprintf(out_dot_file_p,
+            "edge [\n\
+                penwidth=2,\n\
+                    arrowhead=\"vee\"\n\
+            ]\n\
+            \n\
+             node [shape=plain]\n""INFO [label=<\n\
+                <TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\" BGCOLOR=\"#9975bf\">\n\
+                    <TR><TD COLSPAN=\"3\">INFO</TD></TR>\n\
+                    <TR>\n\
+                        <TD>size = 20</TD>\n\
+                        <TD>tail idx = 20</TD>\n\
+                        <TD>first free idx = 20</TD>\n\
+                    </TR>\n\
+                </TABLE>\n\
+            >];");
 }
 
 void setElemslocationInVisualization(const list_t* const list_p, FILE* const out_dot_file_p){
@@ -307,7 +329,7 @@ void setElemslocationInVisualization(const list_t* const list_p, FILE* const out
 
     fprintf(out_dot_file_p, "}\n");
     fprintf(out_dot_file_p, "{rank=sink; head; tail;\"first free\"}");
-    fprintf(out_dot_file_p, "{rank=source; 0}");
+    fprintf(out_dot_file_p, "{rank=source; 0; INFO}");
     fprintf(out_dot_file_p, "\n}");
 
 }
