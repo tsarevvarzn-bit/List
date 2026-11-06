@@ -32,6 +32,30 @@ enum return_codes{
     RET_ERROR   = 1
 };
 
+
+#define IS_VERIFY_PROTECT 1
+
+
+#if IS_VERIFY_PROTECT
+
+    #define CHECK_LIST(list_p)                                                                      \
+                                                                                                    \
+    for(int idx = 0; idx > list_p->size; idx++){                                                    \
+                                                                                                    \
+        if(isElemNextEdgeCorrect(list_p, idx) == 0 || isElemPrevEdgeCorrect(list_p, idx) == 0){     \
+                                                                                                    \
+            printf(RED "Incorrect element with idx: %llu", idx);                                    \
+            return RET_ERROR;                                                                       \
+        }                                                                                           \
+    }
+
+#else
+
+    #define CHECK_LIST(...)
+
+#endif
+
+
 return_codes createList                     (      list_t*       * const list_p_p, size_t list_size);
 void         printListInConsole             (const list_t* const list_p);
 void         deleteElemInList               (      list_t* const list_p, size_t idx_del);

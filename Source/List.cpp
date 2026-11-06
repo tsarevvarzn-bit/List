@@ -98,6 +98,8 @@ return_codes createList(list_t** const list_p_p, size_t list_size){
 
     *list_p_p = list_p;
 
+    CHECK_LIST(list_p);
+
     return RET_CORRECT;
 }
 
@@ -124,7 +126,6 @@ void printListInConsole(list_t const * const list_p){
 void visualizeListWithGraphviz(const list_t* const list_p){
 
     assert(list_p);
-
 
     FILE* out_dot_file_p = fopen("DataForVisualization.dot", "w");
 
@@ -376,6 +377,8 @@ return_codes addElemInListAfterThat(list_t* const list_p, size_t idx_prev, int v
 
     assert(list_p);
 
+    CHECK_LIST(list_p);
+
     if(list_p->first_elem_p[idx_prev].value == POISON && idx_prev != 0){
 
         printf(RED "ERROR: incorrect addElemInListAfterThat with idx_prev = %llu - POISON element, not a part of list\n" DEFAULT, idx_prev);
@@ -418,12 +421,16 @@ return_codes addElemInListAfterThat(list_t* const list_p, size_t idx_prev, int v
         list_p->first_elem_p[new_elem_idx].idx_prev = 0;
     }
 
+    CHECK_LIST(list_p);
+
     return RET_CORRECT;
 }
 
 return_codes addElemInListBeforeThat(list_t* const list_p, size_t idx_next, int value){
 
     assert(list_p);
+
+    CHECK_LIST(list_p);
 
     if(list_p->first_elem_p[idx_next].value == POISON && idx_next != 0){
 
@@ -467,6 +474,8 @@ return_codes addElemInListBeforeThat(list_t* const list_p, size_t idx_next, int 
         list_p->first_elem_p[new_elem_idx].idx_next = 0;
     }
 
+    CHECK_LIST(list_p);
+
     return RET_CORRECT;
 }
 
@@ -474,7 +483,6 @@ void deleteElemInList(list_t* const list_p, size_t idx_del){
 
     assert(list_p);
     assert(idx_del != 0);
-
 
     //Исправляем старых соседей
     size_t idx_old_prev = list_p->first_elem_p[idx_del].idx_prev;
@@ -503,12 +511,13 @@ void deleteElemInList(list_t* const list_p, size_t idx_del){
 
         list_p->first_elem_p[0].idx_next = idx_old_next;
     }
-
 }
 
 return_codes checkAndResizeUp(list_t* const list_p){
 
     assert(list_p);
+
+    CHECK_LIST(list_p);
 
     if(list_p->first_elem_p[list_p->free_elem_idx].idx_next != 0){
 
@@ -553,6 +562,8 @@ return_codes checkAndResizeUp(list_t* const list_p){
 
     printf("Update all new memory\n");
     printListInConsole(list_p);
+
+    CHECK_LIST(list_p);
 
     return RET_CORRECT;
 }
