@@ -25,6 +25,8 @@ const size_t DEFAULT_LIST_SIZE     = 5     ;
 const size_t POISON                = 675242;
 const int    SYSTEM_CORRECT_RETURN = 0     ;
 
+const int    MAX_LEN_OF_STR_FOR_SYSTEM_CALL = 250;
+
 enum return_codes{
 
     RET_CORRECT = 0,
@@ -36,14 +38,10 @@ enum return_codes{
 
     #define CHECK_LIST(list_p)                                                                      \
                                                                                                     \
-    for(size_t idx = 0; idx <= list_p->size; idx++){                                                \
+    if(isListCorrect(list_p) == RET_ERROR){                                                         \
                                                                                                     \
-        if(isElemNextEdgeCorrect(list_p, idx) == 0 || isElemPrevEdgeCorrect(list_p, idx) == 0){     \
-                                                                                                    \
-            printf(RED "Incorrect element with idx: %llu" DEFAULT, idx);                            \
-            return RET_ERROR;                                                                       \
-        }                                                                                           \
-    }
+        return RET_ERROR;                                                                           \
+    }                                                                                               \
 
 #else
 
@@ -56,12 +54,12 @@ return_codes createList                     (      list_t*       * const list_p_
 void         printListInConsole             (const list_t* const list_p);
 return_codes addElemInListAfterThat         (      list_t* const list_p, size_t idx_prev, int value);
 return_codes addElemInListBeforeThat        (      list_t* const list_p, size_t idx_next, int value);
-return_codes addElemInTailOfList            (      list_t* const list_p, int value);
-return_codes addElemInHeadOfList            (      list_t* const list_p, int value);
+return_codes addElemInTailOfList            (      list_t* const list_p,                  int value);
+return_codes addElemInHeadOfList            (      list_t* const list_p,                  int value);
 return_codes checkAndResizeUp               (      list_t* const list_p);
 return_codes deleteElemInList               (      list_t* const list_p, size_t idx_del);
 
-void         visualizeListWithGraphviz      (const list_t* const list_p);
+void         visualizeListWithGraphviz      (const list_t* const list_p, const char * const name_of_file);
 
 void         addPreambleToVisualization     (const list_t* const list_p, FILE* const out_dot_file_p);
 void         addElemsToVisualization        (const list_t* const list_p, FILE* const out_dot_file_p);
@@ -72,6 +70,7 @@ void         addUnnormalEdgesToVisualization(const list_t* const list_p, FILE* c
 
 bool         isElemNextEdgeCorrect          (const list_t* const list_p, size_t idx);
 bool         isElemPrevEdgeCorrect          (const list_t* const list_p, size_t idx);
+bool         isListCorrect                  (const list_t* const list_p);
 
 
 #endif

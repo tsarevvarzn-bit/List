@@ -12,42 +12,26 @@ int main(){
     printListInConsole(list_p);
     addElemInTailOfList(list_p, 67);
     printListInConsole(list_p);
-    addElemInListAfterThat(list_p, 1, 98);
-    printListInConsole(list_p);
+    // addElemInListAfterThat(list_p, 1, 98);
+    // printListInConsole(list_p);
     deleteElemInList(list_p, 3);
     printListInConsole(list_p);
 
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
-    addElemInTailOfList(list_p, 67);
-    printListInConsole(list_p);
+    // addElemInTailOfList(list_p, 67);
+    // printListInConsole(list_p);
+    // addElemInTailOfList(list_p, 67);
+    // printListInConsole(list_p);
+    // addElemInTailOfList(list_p, 67);
+    // printListInConsole(list_p);
+    // addElemInTailOfList(list_p, 67);
+    // printListInConsole(list_p);
 
-    deleteElemInList(list_p, 8);
-    printListInConsole(list_p);
-
-    addElemInListBeforeThat(list_p, 6, -44);
-    printListInConsole(list_p);
-    addElemInHeadOfList(list_p, 88);
-    printListInConsole(list_p);
-
-    list_p->first_elem_p[3].idx_next = 10;
-    deleteElemInList(list_p, 8);
+    // list_p->first_elem_p[3].idx_next = 10;
+    // deleteElemInList(list_p, 8);
     printListInConsole(list_p);
 
 
-    visualizeListWithGraphviz(list_p);
+    visualizeListWithGraphviz(list_p, "huinia.svg");
 }
 
 return_codes createList(list_t** const list_p_p, size_t list_size){
@@ -119,12 +103,12 @@ void printListInConsole(list_t const * const list_p){
     }
 }
 
-void visualizeListWithGraphviz(const list_t* const list_p){
+void visualizeListWithGraphviz(const list_t* const list_p, const char * const name_of_file){
 
     assert(list_p);
+    assert(name_of_file);
 
     FILE* out_dot_file_p = fopen("DataForVisualization.dot", "w");
-
 
     addPreambleToVisualization     (list_p, out_dot_file_p);
 
@@ -138,21 +122,24 @@ void visualizeListWithGraphviz(const list_t* const list_p){
 
     setElemslocationInVisualization(list_p, out_dot_file_p);
 
-
     fclose(out_dot_file_p);
 
 
-    int result = system(".\\Graphviz\\bin\\dot.exe -Tsvg DataForVisualization.dot -o visualization.svg");
+    char str_for_system_call[MAX_LEN_OF_STR_FOR_SYSTEM_CALL] = "";
+
+    sprintf(str_for_system_call, ".\\Graphviz\\bin\\dot.exe -Tsvg DataForVisualization.dot -o %s", name_of_file);
+
+    int result = system(str_for_system_call);
 
     if(result == SYSTEM_CORRECT_RETURN){
 
-        printf(GREEN "Correct visualization! Look for a visualization file named " YELLOW "\"visualization.svg\"\n" DEFAULT);
+        printf(GREEN "Correct visualization! Look for a visualization file named " YELLOW "\"%s\"\n" DEFAULT, name_of_file);
 
     }else{
 
         printf(RED "ERROR! Incorrect return of\n"                                                                                    \
-                   "int result = system(\".\\Graphviz\\bin\\dot.exe -Tsvg DataForVisualization.dot -o visualization.svg\");\n"       \
-                   "result: %d" DEFAULT, result);
+                   "int result = system(%s);\n"       \
+                   "result: %d" DEFAULT, str_for_system_call, result);
     }
 }
 
@@ -265,7 +252,7 @@ void addSpecialEdgesToVisualization(const list_t* const list_p, FILE* const out_
     assert(list_p);
     assert(out_dot_file_p);
 
-    // Рисуем head, tail и first free
+    //  Рисуем head, tail и first free
     fprintf(out_dot_file_p, "    node [\n\
         shape=oval,\n\
         style=filled,\n\
@@ -278,7 +265,7 @@ void addSpecialEdgesToVisualization(const list_t* const list_p, FILE* const out_
     \"first free\" -> %llu:s\n",
     list_p->first_elem_p[0].idx_next, list_p->first_elem_p[0].idx_prev, list_p->free_elem_idx);
 
-    //Отдельно рисуем нулевой элемент
+    // Отдельно рисуем нулевой элемент
 
     fprintf(out_dot_file_p, "\tedge [\n\
         color=\"#b5be0e\",\n\
@@ -290,7 +277,7 @@ void addSpecialEdgesToVisualization(const list_t* const list_p, FILE* const out_
             "0:next:e -> %llu:prev:w;\n",
             list_p->first_elem_p[0].idx_next);
 
-    //Теперь табличку INFO
+    // Теперь табличку INFO
 
     fprintf(out_dot_file_p,
             "edge [\n\
@@ -316,7 +303,7 @@ void setElemslocationInVisualization(const list_t* const list_p, FILE* const out
     assert(list_p);
     assert(out_dot_file_p);
 
-    //Задаем горизонтальный строгий порядок по индексам
+    // Задаем горизонтальный строгий порядок по индексам
 
     fprintf(out_dot_file_p, "\nedge [\n\
         style=invis,\n\
@@ -332,7 +319,7 @@ void setElemslocationInVisualization(const list_t* const list_p, FILE* const out
     }
     fprintf(out_dot_file_p, "\n");
 
-    // Head, tail first free снизу
+    //  Head, tail first free снизу
 
     fprintf(out_dot_file_p, "{rank=same; ");
 
@@ -388,16 +375,16 @@ return_codes addElemInListAfterThat(list_t* const list_p, size_t idx_prev, int v
 
     size_t new_elem_idx = list_p->free_elem_idx;
 
-    //Корректируем список свободных элементов
+    // Корректируем список свободных элементов
     list_p->free_elem_idx = list_p->first_elem_p[new_elem_idx].idx_next;
     list_p->first_elem_p[list_p->free_elem_idx].idx_prev = 0;
 
-    //Заполняем наш новый элемент
+    // Заполняем наш новый элемент
     list_p->first_elem_p[new_elem_idx].idx_prev = idx_prev;
     list_p->first_elem_p[new_elem_idx].value    = value;
     list_p->first_elem_p[new_elem_idx].idx_next = list_p->first_elem_p[idx_prev].idx_next;
 
-    //Исправляем новых соседей
+    // Исправляем новых соседей
     list_p->first_elem_p[idx_prev].idx_next = new_elem_idx;
     list_p->first_elem_p[list_p->first_elem_p[new_elem_idx].idx_next].idx_prev = new_elem_idx;
 
@@ -425,16 +412,16 @@ return_codes addElemInListBeforeThat(list_t* const list_p, size_t idx_next, int 
 
     size_t new_elem_idx = list_p->free_elem_idx;
 
-    //Корректируем список свободных элементов
+    // Корректируем список свободных элементов
     list_p->free_elem_idx = list_p->first_elem_p[new_elem_idx].idx_next;
     list_p->first_elem_p[list_p->free_elem_idx].idx_prev = 0;
 
-    //Заполняем наш новый элемент
+    // Заполняем наш новый элемент
     list_p->first_elem_p[new_elem_idx].idx_prev = list_p->first_elem_p[idx_next].idx_prev;
     list_p->first_elem_p[new_elem_idx].value    = value;
     list_p->first_elem_p[new_elem_idx].idx_next = idx_next;
 
-    //Исправляем новых соседей
+    // Исправляем новых соседей
     list_p->first_elem_p[idx_next].idx_prev = new_elem_idx;
     list_p->first_elem_p[list_p->first_elem_p[new_elem_idx].idx_prev].idx_next = new_elem_idx;
 
@@ -455,19 +442,19 @@ return_codes deleteElemInList(list_t* const list_p, size_t idx_del){
 
     CHECK_LIST(list_p);
 
-    //Исправляем старых соседей
+    // Исправляем старых соседей
     size_t idx_old_prev = list_p->first_elem_p[idx_del].idx_prev;
     size_t idx_old_next = list_p->first_elem_p[idx_del].idx_next;
 
     list_p->first_elem_p[idx_old_prev].idx_next = idx_old_next;
     list_p->first_elem_p[idx_old_next].idx_prev = idx_old_prev;
 
-    //Заполняем удаляемый элемент
+    // Заполняем удаляемый элемент
     list_p->first_elem_p[idx_del].idx_prev = 0;
     list_p->first_elem_p[idx_del].value    = POISON;
     list_p->first_elem_p[idx_del].idx_next = list_p->free_elem_idx;
 
-    //Корректируем список свободных элементов
+    // Корректируем список свободных элементов
     list_p->first_elem_p[list_p->free_elem_idx].idx_prev = idx_del;
     list_p->free_elem_idx = idx_del;
 
@@ -554,7 +541,7 @@ bool isElemPrevEdgeCorrect(const list_t* const list_p, size_t idx){
 
     assert(list_p);
 
-    if(list_p->first_elem_p[idx].idx_prev == 0 || (list_p->first_elem_p[list_p->first_elem_p[idx].idx_prev].idx_next == idx && list_p->first_elem_p[idx].idx_prev != idx)){
+    if((list_p->first_elem_p[idx].idx_prev == 0 && list_p->first_elem_p[idx].value == POISON)|| (list_p->first_elem_p[list_p->first_elem_p[idx].idx_prev].idx_next == idx && list_p->first_elem_p[idx].idx_prev != idx)){
 
         return true;
 
@@ -563,4 +550,20 @@ bool isElemPrevEdgeCorrect(const list_t* const list_p, size_t idx){
         printf("INCORRECT PREV IDX: %llu\n", idx);
         return false;
     }
+}
+
+bool isListCorrect(const list_t* const list_p){
+
+    assert(list_p);
+
+    for(size_t idx = 0; idx <= list_p->size; idx++){
+
+        if(isElemNextEdgeCorrect(list_p, idx) == 0 || isElemPrevEdgeCorrect(list_p, idx) == 0){
+
+            printf(RED "Incorrect element with idx: %llu" DEFAULT, idx);
+            return RET_ERROR;
+        }
+    }
+
+    return RET_CORRECT;
 }
