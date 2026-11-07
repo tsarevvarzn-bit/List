@@ -54,12 +54,12 @@ enum return_codes{
 
 return_codes createList                     (      list_t*       * const list_p_p, size_t list_size);
 void         printListInConsole             (const list_t* const list_p);
-return_codes deleteElemInList               (      list_t* const list_p, size_t idx_del);
 return_codes addElemInListAfterThat         (      list_t* const list_p, size_t idx_prev, int value);
 return_codes addElemInListBeforeThat        (      list_t* const list_p, size_t idx_next, int value);
 return_codes addElemInTailOfList            (      list_t* const list_p, int value);
 return_codes addElemInHeadOfList            (      list_t* const list_p, int value);
 return_codes checkAndResizeUp               (      list_t* const list_p);
+return_codes deleteElemInList               (      list_t* const list_p, size_t idx_del);
 
 void         visualizeListWithGraphviz      (const list_t* const list_p);
 

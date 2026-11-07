@@ -38,18 +38,14 @@ int main(){
     printListInConsole(list_p);
 
     addElemInListBeforeThat(list_p, 6, -44);
-
-    addElemInHeadOfList(list_p, 88);
-
-    deleteElemInList(list_p, 8);
     printListInConsole(list_p);
-//     printListInConsole(list_p);
-//     addElemInHeadOfList(list_p, 99);
-//     printListInConsole(list_p);
-//     addElemInHeadOfList(list_p, 111);
-//     printListInConsole(list_p);
+    addElemInHeadOfList(list_p, 88);
+    printListInConsole(list_p);
 
     list_p->first_elem_p[3].idx_next = 10;
+    deleteElemInList(list_p, 8);
+    printListInConsole(list_p);
+
 
     visualizeListWithGraphviz(list_p);
 }
@@ -405,22 +401,6 @@ return_codes addElemInListAfterThat(list_t* const list_p, size_t idx_prev, int v
     list_p->first_elem_p[idx_prev].idx_next = new_elem_idx;
     list_p->first_elem_p[list_p->first_elem_p[new_elem_idx].idx_next].idx_prev = new_elem_idx;
 
-    //Если это новый конец
-    if(idx_prev == list_p->first_elem_p[0].idx_prev){
-
-        list_p->first_elem_p[0].idx_prev = new_elem_idx;
-
-        list_p->first_elem_p[new_elem_idx].idx_next = 0;
-    }
-
-    //Если это новое начало
-    if(idx_prev == 0){
-
-        list_p->first_elem_p[0].idx_next = new_elem_idx;
-
-        list_p->first_elem_p[new_elem_idx].idx_prev = 0;
-    }
-
     CHECK_LIST(list_p);
 
     return RET_CORRECT;
@@ -458,31 +438,22 @@ return_codes addElemInListBeforeThat(list_t* const list_p, size_t idx_next, int 
     list_p->first_elem_p[idx_next].idx_prev = new_elem_idx;
     list_p->first_elem_p[list_p->first_elem_p[new_elem_idx].idx_prev].idx_next = new_elem_idx;
 
-    //Если это новое начало
-    if(idx_next == list_p->first_elem_p[0].idx_next){
-
-        list_p->first_elem_p[0].idx_next = new_elem_idx;
-
-        list_p->first_elem_p[new_elem_idx].idx_prev = 0;
-    }
-
-    //Если это новый конец
-    if(idx_next == 0){
-
-        list_p->first_elem_p[0].idx_prev = new_elem_idx;
-
-        list_p->first_elem_p[new_elem_idx].idx_next = 0;
-    }
-
     CHECK_LIST(list_p);
 
     return RET_CORRECT;
 }
 
-void deleteElemInList(list_t* const list_p, size_t idx_del){
+return_codes deleteElemInList(list_t* const list_p, size_t idx_del){
 
     assert(list_p);
-    assert(idx_del != 0);
+
+    if(idx_del == 0 || list_p->first_elem_p[idx_del].value == POISON){
+
+        printf(RED "ERROR: incorrect idx to delete: %llu\n" DEFAULT, idx_del);
+        return RET_ERROR;
+    }
+
+    CHECK_LIST(list_p);
 
     //Исправляем старых соседей
     size_t idx_old_prev = list_p->first_elem_p[idx_del].idx_prev;
@@ -500,17 +471,9 @@ void deleteElemInList(list_t* const list_p, size_t idx_del){
     list_p->first_elem_p[list_p->free_elem_idx].idx_prev = idx_del;
     list_p->free_elem_idx = idx_del;
 
-    //Если это был конец
-    if(idx_del == list_p->first_elem_p[0].idx_prev){
+    CHECK_LIST(list_p);
 
-        list_p->first_elem_p[0].idx_prev = idx_old_prev;
-    }
-
-    //Если было начало
-    if(idx_del == list_p->first_elem_p[0].idx_next){
-
-        list_p->first_elem_p[0].idx_next = idx_old_next;
-    }
+    return RET_CORRECT;
 }
 
 return_codes checkAndResizeUp(list_t* const list_p){
@@ -524,9 +487,6 @@ return_codes checkAndResizeUp(list_t* const list_p){
         return RET_CORRECT;
     }
 
-    printf("We need to resize up\n");
-    printListInConsole(list_p);
-
     elem_struct_t* new_memory_block_p = (elem_struct_t*) realloc(list_p->first_elem_p, sizeof(elem_struct_t) * (list_p->size * 2 + 1));
 
     if(new_memory_block_p == NULL){
@@ -539,12 +499,9 @@ return_codes checkAndResizeUp(list_t* const list_p){
     list_p->first_elem_p = new_memory_block_p;
 
     printf("Allocated new memory block\n");
-    printListInConsole(list_p);
 
     list_p->first_elem_p[list_p->free_elem_idx].idx_next = list_p->size + 1;
 
-    printf("Update free elem idx\n");
-    printListInConsole(list_p);
 
     for(size_t i = list_p->size + 1; i <= list_p->size * 2; i++){
 
@@ -558,10 +515,6 @@ return_codes checkAndResizeUp(list_t* const list_p){
     list_p->first_elem_p[list_p->size * 2].idx_next = 0;
 
     list_p->size *= 2;
-
-
-    printf("Update all new memory\n");
-    printListInConsole(list_p);
 
     CHECK_LIST(list_p);
 
@@ -585,7 +538,6 @@ return_codes addElemInHeadOfList(list_t* const list_p, int value){
 bool isElemNextEdgeCorrect(const list_t* const list_p, size_t idx){
 
     assert(list_p);
-    assert(idx);
 
     if(list_p->first_elem_p[idx].idx_next == 0 || (list_p->first_elem_p[list_p->first_elem_p[idx].idx_next].idx_prev == idx && list_p->first_elem_p[idx].idx_next != idx)){
 
@@ -593,6 +545,7 @@ bool isElemNextEdgeCorrect(const list_t* const list_p, size_t idx){
 
     }else{
 
+        printf("INCORRECT NEXT IDX: %llu\n", idx);
         return false;
     }
 }
@@ -600,7 +553,6 @@ bool isElemNextEdgeCorrect(const list_t* const list_p, size_t idx){
 bool isElemPrevEdgeCorrect(const list_t* const list_p, size_t idx){
 
     assert(list_p);
-    assert(idx);
 
     if(list_p->first_elem_p[idx].idx_prev == 0 || (list_p->first_elem_p[list_p->first_elem_p[idx].idx_prev].idx_next == idx && list_p->first_elem_p[idx].idx_prev != idx)){
 
